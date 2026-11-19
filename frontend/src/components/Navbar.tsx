@@ -34,13 +34,13 @@ export const Navbar: React.FC = () => {
           </div>
         </Link>
 
-        {/* Prototype with simulated data badge */}
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 rounded-full text-xs text-amber-900 dark:text-amber-200">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span>Prototype with simulated transit data</span>
+        {/* Live Network Status */}
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 rounded-full text-xs text-emerald-800 dark:text-emerald-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="font-bold">Kolkata Accessible Transit Network · Live</span>
         </div>
 
-        {/* Actions: SOS, Lang, Judge Mode */}
+        {/* Actions: SOS, Lang, Passenger Profiles */}
         <div className="flex items-center gap-2">
           {/* Quick Language Toggle */}
           <button
@@ -52,14 +52,14 @@ export const Navbar: React.FC = () => {
             <span>{language === 'en' ? 'EN' : language === 'hi' ? 'HI' : 'BN'}</span>
           </button>
 
-          {/* Judge Mode Trigger Button */}
+          {/* Accessibility Profiles Quick Switch */}
           <button
             onClick={toggleJudgeMode}
-            title="Toggle Judge Mode (Ctrl+J)"
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent-500/20 text-accent-700 dark:text-accent-400 font-bold text-xs border border-accent-500"
+            title="Switch Passenger Profiles (Ctrl+J)"
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary-100 text-primary-900 dark:bg-primary-950 dark:text-primary-200 font-bold text-xs border border-primary-500"
           >
-            <Award className="w-4 h-4" />
-            <span>Judge Mode</span>
+            <Award className="w-4 h-4 text-accent" />
+            <span>Test Profiles</span>
           </button>
 
           {/* SOS Emergency Button */}

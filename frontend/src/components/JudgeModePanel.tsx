@@ -48,7 +48,7 @@ export const JudgeModePanel: React.FC = () => {
         <div className="flex items-center gap-2">
           <Award className="w-6 h-6 text-accent-500" />
           <h2 id="judge-panel-title" className="font-bold text-lg">
-            Judge & Demo Mode <span className="text-xs bg-accent-500 text-black px-1.5 py-0.5 rounded font-black">Ctrl+J</span>
+            Passenger Profiles & Diagnostics <span className="text-xs bg-accent-500 text-black px-1.5 py-0.5 rounded font-black">Ctrl+J</span>
           </h2>
         </div>
         <button

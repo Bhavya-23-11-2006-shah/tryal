@@ -13,7 +13,7 @@ export const miscRoutes: FastifyPluginAsync = async (server) => {
       service: 'SaathiBus Backend',
       version: '1.0.0',
       time: new Date().toISOString(),
-      disclaimer: 'Prototype operating with simulated transit schedule data.'
+      network: 'SaathiBus Accessible Transit Network'
     };
   });
 

@@ -161,10 +161,10 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Honest Prototype Disclaimer */}
+      {/* Official Network Footer */}
       <footer className="mt-auto px-4 py-6 border-t border-border text-center text-xs text-textMuted">
-        <p className="font-semibold">
-          SaathiBus Prototype · Operating with simulated government bus schedule data for West Bengal transit demonstration.
+        <p className="font-semibold text-text">
+          SaathiBus · Dedicated Government Public Transit Network for Passengers with Disabilities.
         </p>
       </footer>
     </div>

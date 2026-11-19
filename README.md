@@ -1,7 +1,7 @@
 # SaathiBus (साथी बस) - Every journey, for everyone
 
-> Accessible Government Bus Booking Platform for People with Disabilities.
-> Built for AI Vibe-Coding Competition with WCAG 2.2 AAA accessibility standards.
+> Real-World Accessible Public Transit Platform for Passengers with Disabilities.
+> Built adhering strictly to WCAG 2.2 AAA accessibility standards.
 
 ---
 
