@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: SaathiBus API
+  version: 1.0.0
+  description: >
+    Accessible government bus booking platform for people with disabilities.
+    Features voice assistant intent processing, nearest-time fallback resolution,
+    and real-time conductor dispatch alerts.
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+paths:
+  /api/health:
+    get:
+      summary: Service health check
+      responses:
+        '200':
+          description: Service is healthy
+  /api/auth/otp/request:
+    post:
+      summary: Request mobile OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  example: "9800000001"
+      responses:
+        '200':
+          description: OTP dispatched
+  /api/auth/otp/verify:
+    post:
+      summary: Verify OTP and receive JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Logged in session
+  /api/stops:
+    get:
+      summary: Search or list bus stops
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of stops
+  /api/search:
+    get:
+      summary: Search accessible buses with nearest-time algorithm
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: time
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: needs
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Exact trips or nearest-before & nearest-after options
+  /api/trips/{id}:
+    get:
+      summary: Get trip layout, wheelchair bays, and seat states
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trip details with seats map
+  /api/bookings:
+    post:
+      summary: Create seat or wheelchair bay reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tripId
+              properties:
+                tripId:
+                  type: string
+                seatId:
+                  type: string
+                fromStop:
+                  type: string
+                toStop:
+                  type: string
+                needs:
+                  type: array
+                  items:
+                    type: string
+                companion:
+                  type: boolean
+                guideDog:
+                  type: boolean
+                idempotencyKey:
+                  type: string
+      responses:
+        '201':
+          description: Booking confirmed
+    get:
+      summary: List user bookings
+      responses:
+        '200':
+          description: List of bookings
+  /api/bookings/{id}:
+    get:
+      summary: Get booking ticket, QR code, and tracking state
+    patch:
+      summary: Reschedule booking
+    delete:
+      summary: Cancel booking and release seat
+  /api/stream/bookings/{id}:
+    get:
+      summary: Server-Sent Events stream for ticket & conductor updates
+  /api/assistant/message:
+    post:
+      summary: Voice assistant intent processing (Gemini with rule-based fallback)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                sessionId:
+                  type: string
+                language:
+                  type: string
+                  enum: [en, hi, bn]
+      responses:
+        '200':
+          description: Assistant response with intent and read-back reply
+  /api/conductor/login:
+    post:
+      summary: Conductor shift login
+  /api/conductor/alerts:
+    get:
+      summary: List active conductor alerts or subscribe via SSE
+  /api/conductor/alerts/{id}/ack:
+    post:
+      summary: Conductor acknowledges assistance alert
+  /api/conductor/alerts/{id}/outcome:
+    post:
+      summary: Conductor records passenger boarding or no-show
+  /api/sos:
+    post:
+      summary: Trigger emergency SOS alert
+  /api/depot/overview:
+    get:
+      summary: Real-time depot operations dashboard

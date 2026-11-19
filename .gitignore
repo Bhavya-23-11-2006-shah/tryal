@@ -1,0 +1,11 @@
+# Root .gitignore
+node_modules/
+.env
+*.db
+*.db-journal
+*.db-wal
+dist/
+logs/
+coverage/
+.DS_Store
+Thumbs.db

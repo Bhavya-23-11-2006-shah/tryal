@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #0f766e;
+  --color-accent: #f59e0b;
+  --color-surface: #ffffff;
+  --color-background: #f8fafc;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: #cbd5e1;
+  --text-scale: 1;
+}
+
+/* Dark Theme */
+.dark {
+  --color-primary: #14b8a6;
+  --color-accent: #fbbf24;
+  --color-surface: #1e293b;
+  --color-background: #0f172a;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+}
+
+/* High-Contrast Theme (AAA WCAG 2.2 Compliance: Yellow on Pure Black) */
+.theme-high-contrast {
+  --color-primary: #ffff00 !important;
+  --color-accent: #00ffff !important;
+  --color-surface: #000000 !important;
+  --color-background: #000000 !important;
+  --color-text: #ffffff !important;
+  --color-text-muted: #ffff00 !important;
+  --color-border: #ffffff !important;
+}
+
+/* Color-blind safe theme */
+.theme-colorblind {
+  --color-primary: #0072b2;
+  --color-accent: #e69f00;
+  --color-surface: #ffffff;
+  --color-background: #fdfefe;
+  --color-text: #000000;
+  --color-text-muted: #495057;
+  --color-border: #adb5bd;
+}
+
+html {
+  font-size: calc(18px * var(--text-scale, 1));
+  line-height: 1.6;
+}
+
+/* Non-negotiable Accessibility Rule: Visible 3px focus ring with offset on all interactive elements */
+*:focus-visible {
+  outline: 3px solid var(--color-accent) !important;
+  outline-offset: 3px !important;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduced-motion * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* OpenDyslexic font support */
+.font-dyslexic {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+}
+
+/* Large Accessible Touch Targets */
+button, a, input, select, textarea {
+  min-height: 48px;
+  touch-action: manipulation;
+}
