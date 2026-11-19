@@ -21,6 +21,7 @@ import { DepotPage } from './pages/DepotPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 import { HelpPage } from './pages/HelpPage.tsx';
 import { SosPage } from './pages/SosPage.tsx';
+import { SystemTestPage } from './pages/SystemTestPage.tsx';
 
 export const App: React.FC = () => {
   return (
@@ -50,6 +51,7 @@ export const App: React.FC = () => {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/sos" element={<SosPage />} />
+            <Route path="/system-test" element={<SystemTestPage />} />
           </Routes>
         </main>
 
