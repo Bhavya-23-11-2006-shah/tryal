@@ -223,6 +223,7 @@ function handleAssistantActions(
         const pendingAction = {
           type: 'book',
           tripId: selectedTrip.id,
+          seatId: undefined, // Automatically assigned by booking engine to a free seat
           fromStop: mergedSlots.from,
           toStop: mergedSlots.to,
           passengerName: input.profile?.passengerName || input.profile?.name || 'Passenger',
@@ -231,6 +232,13 @@ function handleAssistantActions(
           expiresAt: Date.now() + 5 * 60 * 1000 // 5-minute confirmation TTL
         };
         saveSession(sessionId, { slots: mergedSlots, lastIntent: res.intent }, pendingAction);
+        res.needs_confirmation = true;
+        res.slots = {
+          ...res.slots,
+          tripId: selectedTrip.id,
+          routeNumber: selectedTrip.routeNumber,
+          departs: selectedTrip.departs
+        };
         return;
       }
     } catch {

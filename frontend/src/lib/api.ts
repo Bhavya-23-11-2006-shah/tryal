@@ -13,11 +13,31 @@ export interface AssistantApiResponse {
     needs?: string[];
     bookingId?: string;
     choice?: string;
+    tripId?: string;
+    routeNumber?: string;
+    departs?: string;
   };
   reply_text: string;
   ui_action?: string;
   needs_confirmation: boolean;
   suggestions?: string[];
+}
+
+export function getVoiceSessionId(): string {
+  if (typeof window === 'undefined') return 'sess_default';
+  let sid = window.sessionStorage.getItem('saathibus_voice_session');
+  if (!sid) {
+    sid = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    window.sessionStorage.setItem('saathibus_voice_session', sid);
+  }
+  return sid;
+}
+
+export function resetVoiceSession(): string {
+  if (typeof window === 'undefined') return 'sess_default';
+  const newSid = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  window.sessionStorage.setItem('saathibus_voice_session', newSid);
+  return newSid;
 }
 
 async function safeFetch<T>(endpoint: string, options?: RequestInit, mockFallback?: () => T): Promise<T> {
@@ -146,23 +166,43 @@ export const api = {
     safeFetch(`/api/bookings/${id}`, { method: 'DELETE' }, () => ({ success: true })),
 
   // 6. Voice Assistant
-  sendAssistantMessage: (text: string, language = 'en', profile?: any) =>
-    safeFetch<AssistantApiResponse>(
+  sendAssistantMessage: (text: string, language = 'en', profile?: any, sessionId?: string) => {
+    const activeSession = sessionId || getVoiceSessionId();
+    return safeFetch<AssistantApiResponse>(
       '/api/assistant/message',
       {
         method: 'POST',
-        body: JSON.stringify({ text, language, profile })
+        body: JSON.stringify({ sessionId: activeSession, text, language, profile })
       },
       () => {
-        const clean = text.toLowerCase();
-        if (clean.includes('yes') || clean.includes('confirm') || clean.includes('ha') || clean.includes('হ্যাঁ')) {
+        const clean = text.toLowerCase().trim();
+        if (/^(yes|yeah|yep|confirm|ha|haan|sahi|thik|হাঁ|হ্যাঁ|ঠিক|हां|हाँ|पुष्टि|book it|book the bus)/i.test(clean)) {
+          const newBooking = {
+            id: 'bkg_' + Date.now(),
+            code: '8KG5QD',
+            tripId: 'trp_mock_1',
+            seatId: 'bay_1',
+            seatLabel: 'Wheelchair Bay 1',
+            fromStop: 'Esplanade',
+            toStop: 'Salt Lake Sector V',
+            routeNumber: 'Line 12',
+            departs: '09:00 AM',
+            serviceDate: new Date().toISOString().split('T')[0],
+            needs: profile?.needs || ['wheelchair'],
+            guideDog: profile?.guideDog || false,
+            status: 'confirmed',
+            createdAt: Date.now()
+          };
+          MOCK_BOOKINGS.unshift(newBooking);
+          resetVoiceSession();
           return {
             intent: 'confirm',
+            slots: { bookingId: newBooking.id },
             reply_text: language === 'hi'
-              ? 'बधाई हो! आपकी सीट 8KG5QD कोड के साथ बुक हो गई है।'
+              ? 'बधाई हो! आपकी सीट 8KG5QD कोड के साथ बुक हो गई है। लाइव टिकट खोला जा रहा है।'
               : language === 'bn'
-              ? 'অভিনন্দন! আপনার আসন কোড 8KG5QD দিয়ে বুক করা হয়েছে।'
-              : 'Booking confirmed! Your bus pass code is 8KG5QD. Conductor has been notified.',
+              ? 'অভিনন্দন! আপনার আসন কোড 8KG5QD দিয়ে বুক করা হয়েছে। লাইভ টিকিট খোলা হচ্ছে।'
+              : 'Booking confirmed! Your bus pass code is 8KG5QD. Opening your confirmed live ticket now.',
             ui_action: 'NAVIGATE_TICKET',
             needs_confirmation: false
           };
@@ -170,25 +210,56 @@ export const api = {
         if (clean.includes('salt lake') || clean.includes('সল্টলেক') || clean.includes('साल्ट लेक')) {
           return {
             intent: 'plan_trip',
-            slots: { from: 'Esplanade', to: 'Salt Lake Sector V', time: '09:00' },
+            slots: {
+              from: 'Esplanade',
+              to: 'Salt Lake Sector V',
+              time: '09:00',
+              routeNumber: 'Line 12',
+              departs: '09:00 AM'
+            },
             reply_text: language === 'hi'
-              ? 'एस्प्लेनेड से साल्ट लेक के लिए 9 बजे कोई बस नहीं है। निकटतम बसें 8:42 और 9:25 पर हैं। आप कौन सी चुनेंगे?'
+              ? 'एस्प्लेनेड से साल्ट लेक के लिए 9:00 बजे लाइन 12 बस उपलब्ध है। क्या आप इसे बुक करना चाहते हैं? हाँ बोलें या पुष्टि करें।'
               : language === 'bn'
-              ? 'এসপ্ল্যানেড থেকে সল্টলেক সকাল ৯টায় কোনো বাস নেই। নিকটতম বাস ৮:৪২ এবং ৯:২৫ এ। আপনি কোনটি বেছে নেবেন?'
-              : 'No bus at 9:00 AM from Esplanade to Salt Lake. Closest before is 8:42 AM, closest after is 9:25 AM. Which would you prefer?',
+              ? 'এসপ্ল্যানেড থেকে সল্টলেক সকাল ৯:০০ টায় লাইন ১২ বাস পাওয়া গেছে। আপনি কি এটি বুক করতে চান? হ্যাঁ বলুন।'
+              : 'Accessible bus found on Line 12 from Esplanade to Salt Lake Sector V at 09:00 AM. Would you like to confirm and book this bus? Please say yes to confirm.',
             ui_action: 'EXECUTE_SEARCH',
             needs_confirmation: true,
-            suggestions: ['The earlier 8:42 bus', 'The later 9:25 bus']
+            suggestions: ['Yes, confirm', 'Choose another time']
+          };
+        }
+        if (clean.includes('airport') || clean.includes('हवाई') || clean.includes('বিমান')) {
+          return {
+            intent: 'plan_trip',
+            slots: {
+              from: 'Howrah Station',
+              to: 'Airport Gate 1',
+              time: '10:00',
+              routeNumber: 'Line 24',
+              departs: '10:00 AM'
+            },
+            reply_text: language === 'hi'
+              ? 'हावड़ा से एयरपोर्ट गेट 1 के लिए सुबह 10:00 बजे लाइन 24 बस तैयार है। क्या आप बुक करना चाहते हैं? हाँ बोलें।'
+              : language === 'bn'
+              ? 'হাওড়া থেকে বিমানবন্দর সকাল ১০:০০ টায় লাইন ২৪ বাস প্রস্তুত। বুক করতে চাইলে হ্যাঁ বলুন।'
+              : 'Found accessible bus on Line 24 from Howrah Station to Airport Gate 1 at 10:00 AM. Would you like to confirm and book this bus? Please say yes to confirm.',
+            ui_action: 'EXECUTE_SEARCH',
+            needs_confirmation: true,
+            suggestions: ['Yes, confirm', 'Cancel']
           };
         }
         return {
           intent: 'help',
-          reply_text: 'I am listening. Where would you like to travel today?',
+          reply_text: language === 'hi'
+            ? 'नमस्ते! मैं साथी बस सहायक हूँ। आप कहाँ जाना चाहते हैं? जैसे: साल्ट लेक या एयरपोर्ट।'
+            : language === 'bn'
+            ? 'নমস্কার! আমি সাথীবাস সহকারী। আপনি কোথায় যেতে চান? যেমন: সল্টলেক বা বিমানবন্দর।'
+            : 'Hello! I am your SaathiBus voice assistant. Where would you like to travel? Speak or type, for example "Book bus to Salt Lake at 9 AM".',
           needs_confirmation: false,
-          suggestions: ['Bus to Salt Lake at 9 AM', 'To Airport Gate 1', 'Help me']
+          suggestions: ['To Salt Lake at 9 AM', 'Howrah to Airport', 'Help me']
         };
       }
-    ),
+    );
+  },
 
   // 7. SOS
   sendSos: (payload: any) =>

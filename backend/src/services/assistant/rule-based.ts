@@ -12,6 +12,9 @@ export interface AssistantResponse {
     needs?: string[];
     bookingId?: string;
     choice?: string;
+    tripId?: string;
+    routeNumber?: string;
+    departs?: string;
   };
   reply_text: string;
   ui_action?: string;
