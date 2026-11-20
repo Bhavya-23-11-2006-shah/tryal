@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, Clock, ArrowUpDown, Bus, Heart, Home, Building2, AlertOctagon } from 'lucide-react';
 import { VoiceOrb } from '../components/VoiceOrb.tsx';
 import { useA11yStore } from '../features/a11y/a11y-store.ts';
+import { api } from '../lib/api.ts';
 import { MOCK_STOPS } from '../mock/mock-adapter.ts';
 
 export const HomePage: React.FC = () => {
@@ -13,6 +14,15 @@ export const HomePage: React.FC = () => {
   const [toStop, setToStop] = useState('Salt Lake Sector V');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('09:00');
+  const [stopsList, setStopsList] = useState<any[]>(MOCK_STOPS);
+
+  React.useEffect(() => {
+    api.getStops().then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setStopsList(data);
+      }
+    }).catch(() => {});
+  }, []);
 
   const swapStops = () => {
     const temp = fromStop;
@@ -66,7 +76,7 @@ export const HomePage: React.FC = () => {
                 onChange={(e) => setFromStop(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 bg-background border-2 border-border rounded-xl font-bold text-base focus:border-primary focus:ring-2 focus:ring-accent"
               >
-                {MOCK_STOPS.map((s) => (
+                {stopsList.map((s) => (
                   <option key={s.id} value={s.name}>
                     {s.name} ({s.name_hi})
                   </option>
@@ -100,7 +110,7 @@ export const HomePage: React.FC = () => {
                 onChange={(e) => setToStop(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 bg-background border-2 border-border rounded-xl font-bold text-base focus:border-primary focus:ring-2 focus:ring-accent"
               >
-                {MOCK_STOPS.map((s) => (
+                {stopsList.map((s) => (
                   <option key={s.id} value={s.name}>
                     {s.name} ({s.name_hi})
                   </option>

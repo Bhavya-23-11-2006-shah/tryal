@@ -21,6 +21,13 @@ export const ReviewConfirmPage: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
+  const [tripData, setTripData] = useState<any>(null);
+
+  React.useEffect(() => {
+    if (tripId) {
+      api.getTrip(tripId).then(setTripData).catch(() => {});
+    }
+  }, [tripId]);
 
   const passenger = bookedFor || profile.passengerName || 'Asha Sharma';
 
@@ -104,10 +111,12 @@ export const ReviewConfirmPage: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-border">
               <div>
                 <span className="text-xs font-black text-primary-700 bg-primary/10 px-2.5 py-1 rounded-lg">
-                  Line 12
+                  {tripData?.route_number || tripData?.routeNumber || 'Line 12'}
                 </span>
-                <h2 className="text-xl font-black mt-2">08:42 AM Departure</h2>
-                <p className="text-xs text-textMuted">Bus Reg: WB-01-A-1002 (Low Floor)</p>
+                <h2 className="text-xl font-black mt-2">
+                  {tripData?.scheduled_departs ? `${tripData.scheduled_departs} Departure` : '08:42 AM Departure'}
+                </h2>
+                <p className="text-xs text-textMuted">Bus Reg: {tripData?.reg_no || 'WB-01-A-1002'} {tripData?.features?.low_floor ? '(Low Floor)' : ''}</p>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-black text-emerald-600">₹0</span>

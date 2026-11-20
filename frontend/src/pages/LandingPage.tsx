@@ -38,7 +38,7 @@ export const LandingPage: React.FC = () => {
             to="/onboarding"
             className="px-8 py-4 bg-primary-700 hover:bg-primary-800 text-white font-black text-lg rounded-2xl shadow-xl flex items-center gap-2 transition-transform active:scale-95 focus:ring-4 focus:ring-accent"
           >
-            <span>Try The Demo</span>
+            <span>Get Started</span>
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link

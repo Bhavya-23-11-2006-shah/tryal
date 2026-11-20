@@ -269,6 +269,9 @@ export function cancelBooking(bookingId: string): { success: boolean; message: s
   const db = getDb();
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(bookingId) as any;
   if (!booking) throw new AppError('Booking not found.', 404, 'BOOKING_NOT_FOUND');
+  if (booking.status === 'cancelled') {
+    return { success: true, message: 'Booking is already cancelled.' };
+  }
 
   db.exec('BEGIN TRANSACTION;');
   try {

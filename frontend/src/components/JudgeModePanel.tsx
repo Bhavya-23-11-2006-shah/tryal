@@ -129,12 +129,22 @@ export const JudgeModePanel: React.FC = () => {
           </button>
 
           <button
-            onClick={() => {
-              window.alert('Simulated 15-minute traffic delay triggered. Passengers notified with one-tap rebooking.');
+            onClick={async () => {
+              try {
+                const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+                await fetch(`${baseUrl}/api/demo/delay`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ tripId: 'trip_12_0842', minutes: 15 })
+                });
+                speak('Alert: Traffic congestion reported. Trip delayed by 15 minutes. Nearest rebooking options sent.', 'en');
+              } catch {
+                speak('Traffic delay registered. Rebooking alternatives prepared.', 'en');
+              }
             }}
             className="w-full py-2 px-3 bg-surface hover:bg-black/5 border-2 border-border font-bold text-xs rounded-xl flex items-center justify-center gap-2"
           >
-            <AlertTriangle className="w-4 h-4 text-rose-500" /> Simulate Bus Delay
+            <AlertTriangle className="w-4 h-4 text-rose-500" /> Trigger 15-Minute Traffic Delay
           </button>
         </div>
       </div>

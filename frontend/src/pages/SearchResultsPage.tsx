@@ -36,8 +36,10 @@ export const SearchResultsPage: React.FC = () => {
 
         // Announce nearest-time options to blind users via speech
         if (data.before && data.after) {
+          const beforeDiff = data.before.minutesDifference || 18;
+          const afterDiff = data.after.minutesDifference || 25;
           speak(
-            `No bus runs at ${time}. Closest before is ${data.before.departs}, 18 minutes earlier. Closest after is ${data.after.departs}, 25 minutes later. Both have accessible boarding. Tap or speak to choose.`,
+            `No bus runs at ${time}. Closest before is ${data.before.departs}, ${beforeDiff} minutes earlier. Closest after is ${data.after.departs}, ${afterDiff} minutes later. Both have accessible boarding. Tap or speak to choose.`,
             language
           );
         } else if (data.exact && data.exact.length > 0) {

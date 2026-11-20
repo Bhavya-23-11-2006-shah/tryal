@@ -51,19 +51,69 @@ export interface SearchResponse {
   waitlistOffered?: boolean;
 }
 
+const LANDMARK_MAP: Record<string, string> = {
+  'victoria memorial': 'stop_esp',
+  'victoria': 'stop_esp',
+  'eden gardens': 'stop_esp',
+  'maidan': 'stop_esp',
+  'howrah bridge': 'stop_how',
+  'howrah': 'stop_how',
+  'sector v': 'stop_slv',
+  'sector 5': 'stop_slv',
+  'sec v': 'stop_slv',
+  'sec 5': 'stop_slv',
+  'salt lake sector v': 'stop_slv',
+  'salt lake': 'stop_slv',
+  'karunamoyee': 'stop_slv',
+  'salt lake stadium': 'stop_slv',
+  'nicco park': 'stop_slv',
+  'eco park': 'stop_new',
+  'new town': 'stop_new',
+  'city centre 2': 'stop_new',
+  'airport': 'stop_air',
+  'nscb airport': 'stop_air',
+  'dum dum': 'stop_dum',
+  'dumdum': 'stop_dum',
+  'ruby': 'stop_rub',
+  'ruby hospital': 'stop_rub',
+  'ruby more': 'stop_rub',
+  'science city': 'stop_sci',
+  'gariahut': 'stop_gar',
+  'gariahat': 'stop_gar',
+  'golpark': 'stop_gar',
+  'south city': 'stop_gar',
+  'behala': 'stop_beh',
+  'taratala': 'stop_beh',
+  'sealdah': 'stop_sea',
+  'park street': 'stop_pst',
+  'esplanade': 'stop_esp'
+};
+
 /**
- * Fuzzy stop resolver supporting ID, English, Hindi, and Bengali stop names
+ * Fuzzy stop resolver supporting ID, English, Hindi, Bengali stop names, and Kolkata landmarks
  */
 export function resolveStop(input: string): { id: string; name: string; name_hi: string; name_bn: string } | null {
   if (!input) return null;
   const db = getDb();
   const trimmed = input.trim().toLowerCase();
 
-  // Try exact ID match
+  // 1. Try exact ID match
   const byId = db.prepare('SELECT id, name, name_hi, name_bn FROM stops WHERE LOWER(id) = ?').get(trimmed) as any;
   if (byId) return byId;
 
-  // Try exact or partial name in EN, HI, BN
+  // 2. Try Landmark dictionary match
+  if (LANDMARK_MAP[trimmed]) {
+    const byLandmark = db.prepare('SELECT id, name, name_hi, name_bn FROM stops WHERE id = ?').get(LANDMARK_MAP[trimmed]) as any;
+    if (byLandmark) return byLandmark;
+  }
+  for (const [landmark, stopId] of Object.entries(LANDMARK_MAP)) {
+    if (trimmed.includes(landmark) || landmark.includes(trimmed)) {
+      const byLandmark = db.prepare('SELECT id, name, name_hi, name_bn FROM stops WHERE id = ?').get(stopId) as any;
+      if (byLandmark) return byLandmark;
+    }
+  }
+
+  // 3. Try exact or partial name in EN, HI, BN
   const allStops = db.prepare('SELECT id, name, name_hi, name_bn FROM stops').all() as any[];
   for (const s of allStops) {
     if (

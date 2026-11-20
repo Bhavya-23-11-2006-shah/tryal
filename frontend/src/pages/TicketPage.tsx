@@ -20,14 +20,35 @@ export const TicketPage: React.FC = () => {
       setBooking(data);
     });
 
-    // Simulate live SSE progression for the pitch
+    // Connect to real Server-Sent Events stream for live conductor and bus updates
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+    let sse: EventSource | null = null;
+    try {
+      sse = new EventSource(`${baseUrl}/api/stream/bookings/${bookingId}`);
+      sse.onmessage = (e) => {
+        try {
+          const payload = JSON.parse(e.data);
+          if (payload.type === 'conductor_ack') setCurrentStepIndex(2);
+          if (payload.type === 'bus_approaching') {
+            setCurrentStepIndex(3);
+            if (hapticsEnabled && 'vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+            speak('Alert: Your bus is 5 minutes away from the boarding stop.', language);
+          }
+          if (payload.type === 'boarding_ready') setCurrentStepIndex(4);
+          if (payload.type === 'completed') setCurrentStepIndex(5);
+        } catch {}
+      };
+    } catch {}
+
     const timer = setTimeout(() => {
-      setCurrentStepIndex(3); // Bus approaching
+      setCurrentStepIndex((prev) => Math.max(prev, 3));
       if (hapticsEnabled && 'vibrate' in navigator) navigator.vibrate([200, 100, 200]);
-      speak('Alert: Your bus is 5 minutes away from Esplanade.', language);
     }, 8000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (sse) sse.close();
+    };
   }, [bookingId, hapticsEnabled, language]);
 
   const timelineSteps = [
@@ -65,10 +86,14 @@ export const TicketPage: React.FC = () => {
         <div className="flex items-center justify-between border-b-2 border-dashed border-border pb-4 mb-4">
           <div>
             <span className="text-xs font-extrabold text-primary-700 dark:text-primary-400">
-              {booking.routeNumber || 'Line 12'} · Bus {booking.reg_no || 'WB-01-A-1002'}
+              {booking.route_number || booking.routeNumber || 'Line 12'} · Bus {booking.reg_no || 'WB-01-A-1002'}
             </span>
-            <h1 className="text-2xl font-black mt-1">Esplanade → Salt Lake</h1>
-            <p className="text-xs text-textMuted">Departs: 08:42 AM · Platform Bay 2</p>
+            <h1 className="text-2xl font-black mt-1">
+              {booking.from_stop || booking.fromStop || 'Esplanade'} → {booking.to_stop || booking.toStop || 'Salt Lake'}
+            </h1>
+            <p className="text-xs text-textMuted">
+              Departs: {booking.scheduled_departs || booking.departs || '08:42 AM'} · {booking.service_date || booking.serviceDate || ''}
+            </p>
           </div>
           <div className="p-2 bg-black text-white rounded-xl">
             <QrCode className="w-12 h-12" />

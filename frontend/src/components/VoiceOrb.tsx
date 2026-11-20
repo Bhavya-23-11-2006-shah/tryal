@@ -105,10 +105,15 @@ export const VoiceOrb: React.FC<{ size?: 'sm' | 'md' | 'lg'; onAction?: (action:
 
       // Handle UI action dispatch
       if (res.ui_action === 'EXECUTE_SEARCH') {
-        navigate('/search?from=Esplanade&to=Salt Lake Sector V&time=09:00');
+        const fromParam = encodeURIComponent(res.slots?.from || 'Esplanade');
+        const toParam = encodeURIComponent(res.slots?.to || 'Salt Lake Sector V');
+        const dateParam = res.slots?.date || '';
+        const timeParam = res.slots?.time || '09:00';
+        navigate(`/search?from=${fromParam}&to=${toParam}${dateParam ? `&date=${dateParam}` : ''}&time=${timeParam}`);
         if (onAction) onAction('EXECUTE_SEARCH');
       } else if (res.ui_action === 'NAVIGATE_TICKET') {
-        navigate('/ticket/bkg_demo_asha');
+        const ticketTarget = res.slots?.bookingId || 'bkg_demo_asha';
+        navigate(`/ticket/${ticketTarget}`);
       }
 
       // Spoken readback

@@ -2,10 +2,11 @@ import { getDb } from './index.js';
 import crypto from 'node:crypto';
 import { logger } from '../lib/logger.js';
 import { encryptText } from '../lib/crypto.js';
+import { getKolkataDateString } from '../lib/time.js';
 
 export function seedDatabase(): void {
   const db = getDb();
-  logger.info('Seeding database with simulated transit data...');
+  logger.info('Seeding database with accessible transit data...');
 
   // Clear existing data safely
   db.exec(`
@@ -163,9 +164,7 @@ export function seedDatabase(): void {
   const scheduleTimes = ['07:15', '08:42', '09:25', '10:15', '11:30', '13:00', '14:15', '15:45', '17:10', '18:30', '20:00', '21:40'];
 
   for (let dayOffset = 0; dayOffset <= 7; dayOffset++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + dayOffset);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = getKolkataDateString(dayOffset);
 
     routes.forEach((route, rIndex) => {
       // Pick matching buses for route

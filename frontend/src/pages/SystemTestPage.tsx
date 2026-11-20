@@ -32,8 +32,8 @@ export const SystemTestPage: React.FC = () => {
   const checkHealth = async () => {
     setBackendHealth('checking');
     try {
-      const res = await fetch('http://localhost:4000/api/health');
-      if (res.ok) setBackendHealth('connected');
+      const res = await api.getHealth();
+      if (res && res.status === 'healthy') setBackendHealth('connected');
       else setBackendHealth('disconnected');
     } catch {
       setBackendHealth('disconnected');

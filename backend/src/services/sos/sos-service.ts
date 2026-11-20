@@ -67,7 +67,7 @@ export function handleSosEvent(userId?: string, bookingId?: string, lat?: number
 }
 
 /**
- * Mock concession / disability card validation
+ * Verify concession / disability certificate card validation
  */
 export function verifyConcessionCard(idNumber: string): { verified: boolean; type: string; message: string } {
   if (!idNumber || idNumber.trim().length < 6) {

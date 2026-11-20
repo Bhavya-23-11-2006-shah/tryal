@@ -3,6 +3,23 @@ import { MOCK_STOPS, mockSearchTrips, MOCK_BOOKINGS, MOCK_ALERTS } from '../mock
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 const FORCE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
+export interface AssistantApiResponse {
+  intent: string;
+  slots?: {
+    from?: string;
+    to?: string;
+    date?: string;
+    time?: string;
+    needs?: string[];
+    bookingId?: string;
+    choice?: string;
+  };
+  reply_text: string;
+  ui_action?: string;
+  needs_confirmation: boolean;
+  suggestions?: string[];
+}
+
 async function safeFetch<T>(endpoint: string, options?: RequestInit, mockFallback?: () => T): Promise<T> {
   if (FORCE_MOCK && mockFallback) {
     return mockFallback();
@@ -130,7 +147,7 @@ export const api = {
 
   // 6. Voice Assistant
   sendAssistantMessage: (text: string, language = 'en', profile?: any) =>
-    safeFetch(
+    safeFetch<AssistantApiResponse>(
       '/api/assistant/message',
       {
         method: 'POST',

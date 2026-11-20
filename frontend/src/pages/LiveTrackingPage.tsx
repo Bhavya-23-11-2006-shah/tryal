@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bus, MapPin, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useA11yStore } from '../features/a11y/a11y-store.ts';
+import { api } from '../lib/api.ts';
 
 export const LiveTrackingPage: React.FC = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -10,6 +11,7 @@ export const LiveTrackingPage: React.FC = () => {
 
   const [etaMinutes, setEtaMinutes] = useState(5);
   const [progress, setProgress] = useState(45);
+  const [tripInfo, setTripInfo] = useState<any>(null);
 
   const stops = [
     { name: 'Esplanade', passed: true, current: true, time: '08:42 AM' },
@@ -17,6 +19,12 @@ export const LiveTrackingPage: React.FC = () => {
     { name: 'Science City', passed: false, time: '09:06 AM' },
     { name: 'Salt Lake Sector V', passed: false, time: '09:20 AM' }
   ];
+
+  useEffect(() => {
+    if (tripId) {
+      api.getTrip(tripId).then(setTripInfo).catch(() => {});
+    }
+  }, [tripId]);
 
   // Simulated live progress
   useEffect(() => {
@@ -40,7 +48,7 @@ export const LiveTrackingPage: React.FC = () => {
         </button>
         <div>
           <h1 className="text-xl font-black">Live Bus GPS Tracking</h1>
-          <p className="text-xs text-textMuted">Line 12 · Bus WB-01-A-1002</p>
+          <p className="text-xs text-textMuted">{tripInfo?.route_number || 'Line 12'} · Bus {tripInfo?.reg_no || 'WB-01-A-1002'}</p>
         </div>
       </div>
 
